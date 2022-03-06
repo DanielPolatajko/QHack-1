@@ -20,11 +20,23 @@ def hamiltonian_coeffs_and_obs(graph):
     u = 1.35
     obs = []
     coeffs = []
-
     # QHACK #
 
     # create the Hamiltonian coeffs and obs variables here
 
+    for i in range(num_vertices):
+        obs += [qml.PauliZ(wires=i), qml.Identity(wires=1)]
+        coeffs += ([-0.5] * 2)
+
+    for j in range(num_vertices):
+        for k in range(num_vertices):
+            if E[j][k] != 0 and k > j:
+                obs += [qml.operation.Tensor(qml.PauliZ(wires=j), qml.PauliZ(wires=k))]
+                obs += [qml.operation.Tensor(qml.PauliZ(wires=j), qml.Identity(wires=k))]
+                obs += [qml.operation.Tensor(qml.Identity(wires=j), qml.PauliZ(wires=k))]
+                obs += [qml.operation.Tensor(qml.Identity(wires=j), qml.Identity(wires=k))]
+
+                coeffs += ([u/4] * 4)
     # QHACK #
 
     return coeffs, obs
@@ -65,8 +77,7 @@ def variational_circuit(params, num_vertices):
     """
 
     # QHACK #
-
-    # create your variational circuit here
+    qml.templates.layers.StronglyEntanglingLayers(params, wires=range(num_vertices))
 
     # QHACK #
 
@@ -95,6 +106,12 @@ def train_circuit(num_vertices, H):
     # define your trainable parameters and optimizer here
     # change the number of training iterations, `epochs`, if you want to
     # just be aware of the 80s time limit!
+
+    num_layers = 2
+
+    params = 0.01 * np.random.randn(num_layers, num_vertices, 3, requires_grad=True)
+
+    opt = qml.optimize.NesterovMomentumOptimizer(0.5)
 
     epochs = 500
 

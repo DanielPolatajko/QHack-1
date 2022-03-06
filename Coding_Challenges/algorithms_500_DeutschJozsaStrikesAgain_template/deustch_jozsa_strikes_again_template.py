@@ -18,6 +18,28 @@ def deutsch_jozsa(fs):
 
     # QHACK #
 
+    dev = qml.device("default.qubit", wires=3, shots=1)
+
+    @qml.qnode(dev)
+    def circuit(fs):
+        qml.PauliX(wires=2)
+        qml.Hadamard(wires=0)
+        qml.Hadamard(wires=1)
+        qml.Hadamard(wires=2)
+
+        for f in fs:
+            f(list(range(3)))
+
+        qml.Hadamard(wires=0)
+        qml.Hadamard(wires=1)
+
+        return qml.sample(wires=2)
+
+    if circuit(fs) == 1:
+        return "4 same"
+    else:
+        return "2 and 2"
+
     # QHACK #
 
 

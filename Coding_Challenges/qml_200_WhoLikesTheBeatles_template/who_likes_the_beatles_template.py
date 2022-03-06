@@ -21,8 +21,30 @@ def distance(A, B):
     # The Swap test is a method that allows you to calculate |<A|B>|^2 , you could use it to help you.
     # The qml.AmplitudeEmbedding operator could help you too.
 
-    # dev = qml.device("default.qubit", ...
-    # @qml.qnode(dev)
+    dev = qml.device("default.qubit", wires=3)
+
+    @qml.qnode(dev)
+    def circuit(A, B):
+
+        features = np.kron(A, B)
+        qml.AmplitudeEmbedding(features, wires=[1, 2], normalize=True, pad_with=0.)
+
+        qml.Hadamard(wires=0)
+
+        qml.CSWAP(wires=range(3))
+
+        qml.Hadamard(wires=0)
+
+        return qml.probs(wires=0)
+
+    prob = circuit(A, B)[0]
+
+    mag = np.sqrt((prob -0.5) * 2)
+
+    return np.sqrt(2 * (1-mag))
+
+
+
 
     # QHACK #
 
